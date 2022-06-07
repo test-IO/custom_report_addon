@@ -5,5 +5,4 @@ Rails.application.routes.draw do
 
     get 'addons/:id/new_report', to: 'reports#new', as: :new_report
     post 'addons/:id/create_report', to: 'reports#create', as: :create_report
-    post 'addons/:id/create_attachment', to: 'reports#create_attachment', as: :create_attachment
 end

@@ -4,6 +4,11 @@
   - @fields.each do |field|
     %div
       = render 'field', form: form, field: field
+
+  #attachmentsList
+  - @report_attachments.each do |attachment|
+    = render 'attachment', attachment: attachment
+
   %div
     = form.submit 'Submit', data: { turbo: false }
 
@@ -16,18 +21,16 @@
     reportData = JSON.parse('#{@report_data}')
     reportData['data'].forEach(el => document.getElementById(el['key']).value = el['value'])
   }
-
-  const input = document.getElementById('file-field');
-
+  const input = document.getElementById('file-field')
   const upload = (file) => {
-    fd = new FormData()
-    fd.append("file", file)
-
+    const fd = new FormData();
+    fd.append("file", file);
     fetch('#{@attachment_path}', {
       method: 'POST',
       headers: {
         Accept: "application/json",
         "X-Requested-With": "XMLHttpRequest",
+        "Authorization": "JWT #{@jwt_token}"
       },
       body: fd
     }).then(
@@ -38,7 +41,21 @@
       error => console.log(error)
     )
   }
-
   const onSelectFile = () => upload(input.files[0])
-
   input.addEventListener('change', onSelectFile, false)
+
+  function deleteAttachment(id) {
+    fetch('#{Settings.testio_base_url}/addon_api/reports/#{@report_id}/attachments/' + id, {
+      method: 'DELETE',
+      headers: {
+        Accept: "application/json",
+        "Authorization": "JWT #{@jwt_token}"
+      }
+    }).then(
+      response => response.json()
+    ).then(
+      success => document.getElementById('attachmentId' + success.attachment.id).remove()
+    ).catch(
+      error => console.log(error)
+    )
+  }

@@ -1,0 +1,3 @@
+.attachment{id: "attachmentId#{attachment['id']}"}
+  %img{ data: { id: attachment['id'] }, src: attachment['thumbnail_urls']['50x50'] }
+  %a.destroy-attachment-link(onclick="return deleteAttachment(#{attachment['id']})") Delete
