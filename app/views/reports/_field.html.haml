@@ -1,0 +1,9 @@
+= form.label field.key, field.name
+
+- case field.data_type
+- when 'text'
+  = form.text_area field.key
+- when 'string'
+  = form.text_field field.key
+- when 'file'
+  = form.file_field field.key
