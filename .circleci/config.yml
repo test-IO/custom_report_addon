@@ -111,7 +111,6 @@ workflows:
       - deploy-qa:
           requires:
             - test
-            - linter
           filters:
             branches:
               only:
