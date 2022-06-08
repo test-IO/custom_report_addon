@@ -5,9 +5,10 @@
     %div
       = render 'field', form: form, field: field
 
-  #attachmentsList
-  - @report_attachments.each do |attachment|
-    = render 'attachment', attachment: attachment
+  - if @report_attachments.any?
+    #attachmentsList
+    - @report_attachments.each do |attachment|
+      = render 'attachment', attachment: attachment
 
   %div
     = form.submit 'Submit', data: { turbo: false }
