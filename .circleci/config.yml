@@ -46,7 +46,7 @@ jobs:
           DB_HOST: 127.0.0.1
           DB_USERNAME: root
           DB_DATABASE: test
-      - image: cimg/mysql:5.7
+      - image: cimg/postgres:14.3.0
         environment:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
     working_directory: /app
