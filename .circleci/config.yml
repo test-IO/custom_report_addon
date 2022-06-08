@@ -44,17 +44,18 @@ jobs:
         environment:
           RAILS_ENV: test
           DB_HOST: 127.0.0.1
-          DB_USERNAME: root
+          DB_USERNAME: test
           DB_DATABASE: test
       - image: cimg/postgres:14.2
         environment:
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
     working_directory: /app
     steps:
       - run:
           name: Setup database
           command: |
-            while ! nc -z localhost 3306 ; do sleep 1 ; done
+            while ! nc -z localhost 5432 ; do sleep 1 ; done
             bundle exec rake db:create
             bundle exec rake db:schema:load
       # TODO add tests
