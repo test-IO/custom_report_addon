@@ -1,0 +1,2 @@
+host: <%= ENV["HOST"] %>
+testio_base_url: <%= ENV["TESTIO_BASE_URL"] %>

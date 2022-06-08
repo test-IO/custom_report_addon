@@ -1,0 +1,132 @@
+version: 2.1
+infra_container: &infra_container
+                   eu.gcr.io/oi-tset/swissknife@sha256:1dceb221bfc058c4ba22fe4dcbf4f30dfdc10951bc2293d5c53aebc4f87037f3
+
+# Configure authentication in private registry
+infra_container_registry_auth:
+  &infra_container_registry_auth
+  auth:
+    username: _json_key # default username when using a JSON key file to authenticate
+    password: $GOOGLE_JSON_KEY
+
+jobs:
+  build:
+    docker:
+      - image: *infra_container
+        <<: *infra_container_registry_auth
+    environment:
+      IMAGE: eu.gcr.io/oi-tset/cra
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.11
+          docker_layer_caching: true
+      - run:
+          name: Setup access to GCR
+          command: |
+            echo $GOOGLE_JSON_KEY > ${HOME}/gcloud-service-key.json && \
+            gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json && \
+            gcloud auth configure-docker
+      - run:
+          name: Build application image
+          command: |
+            docker build -t $IMAGE:$CIRCLE_SHA1 .
+      - run:
+          name: Push image to GCR
+          command: docker push $IMAGE:$CIRCLE_SHA1
+
+  test:
+    docker:
+      - image: eu.gcr.io/oi-tset/cra:$CIRCLE_SHA1
+        auth:
+          username: _json_key
+          password: $GOOGLE_JSON_KEY
+        environment:
+          RAILS_ENV: test
+          DB_HOST: 127.0.0.1
+          DB_USERNAME: root
+          DB_DATABASE: test
+      - image: cimg/mysql:5.7
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+    working_directory: /app
+    steps:
+      - run:
+          name: Setup database
+          command: |
+            while ! nc -z localhost 3306 ; do sleep 1 ; done
+            bundle exec rake db:create
+            bundle exec rake db:schema:load
+      # TODO add tests
+      #- run: bundle exec rspec
+
+  deploy-qa:
+    docker:
+      - image: *infra_container
+        <<: *infra_container_registry_auth
+    environment:
+      CHART: custom-report-addon
+    steps:
+      - checkout
+      - run: echo $GOOGLE_JSON_KEY > ${HOME}/gcloud-service-key.json
+      - run: gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
+      - run: gcloud container clusters get-credentials qa --region europe-west3-a --project aq-oi-tset
+      - run: git clone git@github.com:test-IO/helm.git
+      - run:
+          name: Helm upgrade
+          command: cd ./helm/ && helm upgrade --install $CHART --namespace cra --set cra.image.tag=$CIRCLE_SHA1 -f ./environments/qa.yaml ./charts/$CHART
+
+  add-tag:
+    docker:
+      - image: *infra_container
+        <<: *infra_container_registry_auth
+    environment:
+      IMAGE: eu.gcr.io/oi-tset/cra
+    steps:
+      - run: echo $GOOGLE_JSON_KEY > ${HOME}/gcloud-service-key.json
+      - run: gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
+      - run: gcloud container images add-tag $IMAGE:$CIRCLE_SHA1 $IMAGE:$CIRCLE_BRANCH --quiet
+
+  cleanup:
+    docker:
+      - image: *infra_container
+        <<: *infra_container_registry_auth
+    environment:
+      DOCKER_IMAGE_NAME: eu.gcr.io/oi-tset/cra
+    steps:
+      - checkout
+      - run: echo $GOOGLE_JSON_KEY > ${HOME}/gcloud-service-key.json
+      - run: gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
+      - run: git clone git@github.com:test-IO/helm.git
+      - run: python3 ./helm/scripts/delete_old_images.py
+
+workflows:
+  version: 2
+  build_test_and_deploy:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - deploy-qa:
+          requires:
+            - test
+            - linter
+          filters:
+            branches:
+              only:
+                - qa
+      - add-tag:
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - main
+      - cleanup:
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - main

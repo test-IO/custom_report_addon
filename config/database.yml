@@ -79,8 +79,13 @@ test:
 # Read https://guides.rubyonrails.org/configuring.html#configuring-a-database
 # for a full overview on how database connection configuration can be specified.
 #
-production:
+production: &production
   <<: *default
-  database: custom_report_addon_production
-  username: custom_report_addon
-  password: <%= ENV["CUSTOM_REPORT_ADDON_DATABASE_PASSWORD"] %>
+  database: <%= ENV["DB_NAME"] %>
+  username: <%= ENV["DB_USERNAME"] %>
+  password: <%= ENV["DB_PASSWORD"] %>
+  host: <%= ENV["DB_HOST"] %>
+  port: <%= ENV["DB_PORT"] || 5432 %>
+
+qa:
+  <<: *production
