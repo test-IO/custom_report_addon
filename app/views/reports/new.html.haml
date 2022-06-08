@@ -5,7 +5,7 @@
     %div
       = render 'field', form: form, field: field
 
-  - if @report_attachments.any?
+  - if @report_attachments
     #attachmentsList
     - @report_attachments.each do |attachment|
       = render 'attachment', attachment: attachment
