@@ -45,7 +45,7 @@ jobs:
           RAILS_ENV: test
           DB_HOST: 127.0.0.1
           DB_USERNAME: test
-          DB_DATABASE: test
+          DB_PASSWORD: test
       - image: cimg/postgres:14.2
         environment:
           POSTGRES_USER: test
