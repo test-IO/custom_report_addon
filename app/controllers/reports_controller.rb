@@ -10,7 +10,10 @@ class ReportsController < ApplicationController
 
       if data['report']
         @report_attachments = data['report']['attachments']
-        @report_data = data['report']['content'].to_json.html_safe
+        @report_data = {
+          content: data['report']['content'],
+          title: data['report']['title']
+        }.to_json.html_safe
       end
     end
 
