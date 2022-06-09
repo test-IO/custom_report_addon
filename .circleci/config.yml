@@ -75,7 +75,7 @@ jobs:
       - run: git clone git@github.com:test-IO/helm.git
       - run:
           name: Helm upgrade
-          command: cd ./helm/ && helm upgrade --install $CHART --namespace cra --set cra.image.tag=$CIRCLE_SHA1 -f ./environments/qa.yaml ./charts/$CHART
+          command: cd ./helm/ && helm upgrade --install cra --namespace cra --set cra.image.tag=$CIRCLE_SHA1 -f ./environments/qa.yaml ./charts/$CHART
 
   add-tag:
     docker:
