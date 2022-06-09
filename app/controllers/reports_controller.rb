@@ -36,6 +36,6 @@ class ReportsController < ApplicationController
   end
 
   def report_params
-    params.permit(@addon.fields.pluck(:key))
+    params.permit(@addon.fields.pluck(:key).push(:title))
   end
 end

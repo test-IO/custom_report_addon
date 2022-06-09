@@ -1,6 +1,9 @@
 = form_with url: create_report_path(@addon.key), method: :post do |form|
   = form.hidden_field :report_id
   = form.hidden_field :redirection_url
+  = form.label :title, 'Title'
+  = form.text_field :title
+
   - @fields.each do |field|
     %div
       = render 'field', form: form, field: field
