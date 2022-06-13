@@ -1,6 +1,9 @@
 = form_with url: create_report_path(@addon.key), method: :post do |form|
   = form.hidden_field :report_id
   = form.hidden_field :redirection_url
+  = form.label :title, 'Title'
+  = form.text_field :title, value: JSON.parse(@report_data || '{}')['title']
+
   - @fields.each do |field|
     %div
       = render 'field', form: form, field: field
@@ -20,7 +23,7 @@
   document.getElementById('redirection_url').value = urlParams.get('redirection_url')
   if ('#{@report_data}' !== '') {
     reportData = JSON.parse('#{@report_data}')
-    reportData['data'].forEach(el => document.getElementById(el['key']).value = el['value'])
+    reportData['content']['data'].forEach(el => document.getElementById(el['key']).value = el['value'])
   }
   const input = document.getElementById('file-field')
   const upload = (file) => {

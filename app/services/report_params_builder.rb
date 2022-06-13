@@ -9,7 +9,7 @@ class ReportParamsBuilder
   def call
     {
       report: {
-        title: 'REPORT TITLE!!!!!!',
+        title: form_params[:title],
         content: fields_data
       }
     }
