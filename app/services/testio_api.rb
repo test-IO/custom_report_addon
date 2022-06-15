@@ -3,6 +3,8 @@ class TestioApi
 
   base_uri Settings.testio_base_url
 
+  raise_on [500, 422, 404, 403, 400, 401]
+
   def initialize(addon)
     payload = { iss: addon.client_key, iat: Time.current.to_i }
     jwt_token = JWT.encode payload, addon.shared_secret_key, 'HS256'

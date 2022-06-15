@@ -30,6 +30,9 @@ class ReportsController < ApplicationController
     TestioApi.new(@addon).update_report(payload, params[:report_id])
 
     redirect_to params[:redirection_url], allow_other_host: true
+
+  rescue HTTParty::ResponseError => e
+    redirect_to request.referer, notice: e
   end
 
   private
