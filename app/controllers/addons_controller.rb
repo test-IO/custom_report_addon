@@ -6,7 +6,7 @@ class AddonsController < ApplicationController
   def install
     @addon.client_key = params[:client_key]
     @addon.shared_secret_key = params[:shared_secret_key]
-    @addon.install!
+    @addon.installed? ? @addon.save! : @addon.install!
 
     render json: { head: :ok }
   end
