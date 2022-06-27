@@ -25,7 +25,7 @@
     reportData = JSON.parse('#{@report_data}')
     reportData['content']['data'].forEach(el => document.getElementById(el['key']).value = el['value'])
   }
-  const input = document.getElementById('file-field')
+  const input = document.querySelectorAll('input[type=file]')
   const upload = (file) => {
     const fd = new FormData();
     fd.append("file", file);
@@ -45,8 +45,11 @@
       error => console.log(error)
     )
   }
-  const onSelectFile = () => upload(input.files[0])
-  input.addEventListener('change', onSelectFile, false)
+  const onSelectFile = (file) => upload(file)
+
+  input.forEach(function (element){
+    element.addEventListener('change', () => onSelectFile(element.files[0]), false)
+  })
 
   function deleteAttachment(id) {
     fetch('#{Settings.testio_base_url}/addon_api/reports/#{@report_id}/attachments/' + id, {
